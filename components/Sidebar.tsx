@@ -1,14 +1,15 @@
-
 import React, { useState, useRef, useEffect } from 'react';
-import type { FilterState } from '../types';
+import type { FilterState, Item } from '../types';
 import { ALL_COMPANIES, FILTER_OPTIONS, DATE_RANGE_OPTIONS } from '../constants';
-import { ChevronDownIcon, FilterIcon, SearchIcon, XIcon, CogIcon } from './Icons';
+import { ChevronDownIcon, FilterIcon, SearchIcon, XIcon, CogIcon, DownloadIcon } from './Icons';
 
 interface SidebarProps {
   filters: FilterState;
+  items: Item[];
   onFiltersChange: React.Dispatch<React.SetStateAction<FilterState>>;
   onLiveSearch: (query: string) => void;
   onManageKeywords: () => void;
+  onDownload: () => void;
 }
 
 const useClickOutside = (ref: React.RefObject<HTMLElement>, handler: () => void) => {
@@ -84,7 +85,7 @@ const MultiSelectDropdown: React.FC<{
 };
 
 
-export const Sidebar: React.FC<SidebarProps> = ({ filters, onFiltersChange, onLiveSearch, onManageKeywords }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ filters, items, onFiltersChange, onLiveSearch, onManageKeywords, onDownload }) => {
     const [liveQuery, setLiveQuery] = useState('');
 
     const handleFilterChange = <K extends keyof FilterState>(key: K, value: FilterState[K]) => {
@@ -182,13 +183,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ filters, onFiltersChange, onLi
                 </div>
             </div>
         </div>
-        <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+        <div className="pt-3 border-t border-gray-200 dark:border-gray-700 space-y-2">
              <button 
                 onClick={onManageKeywords} 
                 className="w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700"
             >
                 <CogIcon className="h-5 w-5 mr-2" />
                 Manage Keyword Profiles
+            </button>
+             <button 
+                onClick={onDownload} 
+                disabled={items.length === 0}
+                className="w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed dark:disabled:bg-gray-600"
+            >
+                <DownloadIcon className="h-5 w-5 mr-2" />
+                Download Newsletter (PDF)
             </button>
         </div>
     </aside>

@@ -1,9 +1,9 @@
 import React from 'react';
-import { DnaIcon, DatabaseIcon, RssIcon } from './Icons';
+import { DnaIcon, DatabaseIcon, RssIcon, ChartBarIcon } from './Icons';
 
 interface HeaderProps {
-    currentView: 'feed' | 'sources';
-    onNavigate: (view: 'feed' | 'sources') => void;
+    currentView: 'feed' | 'sources' | 'dashboard';
+    onNavigate: (view: 'feed' | 'sources' | 'dashboard') => void;
 }
 
 const NavButton: React.FC<{
@@ -43,6 +43,12 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
                 onClick={() => onNavigate('feed')}
                 icon={<RssIcon className="h-5 w-5" />}
                 label="News Feed"
+             />
+              <NavButton 
+                isActive={currentView === 'dashboard'}
+                onClick={() => onNavigate('dashboard')}
+                icon={<ChartBarIcon className="h-5 w-5" />}
+                label="Dashboard"
              />
              <NavButton 
                 isActive={currentView === 'sources'}

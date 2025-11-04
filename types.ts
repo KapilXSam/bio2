@@ -1,4 +1,3 @@
-
 export interface Metrics {
   relevance_score: number;
   impact_score: number;
@@ -47,4 +46,5 @@ export interface KeywordProfile {
     name: string;
     keywords: string[];
     description: string;
+    isCustom?: boolean;
 }
