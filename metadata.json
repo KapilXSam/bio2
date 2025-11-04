@@ -1,0 +1,5 @@
+{
+  "name": "Biosimilar News Monitoring Agent",
+  "description": "An automated agent that continuously gathers, filters, ranks, and delivers timely, high-signal updates on biosimilar-related news, regulatory actions, litigation, and more across global markets.",
+  "requestFramePermissions": []
+}
