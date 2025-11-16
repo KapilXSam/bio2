@@ -26,7 +26,7 @@ const useDebounce = <T,>(value: T, delay: number): T => {
 };
 
 const App: React.FC = () => {
-    const [currentView, setCurrentView] = useState<'feed' | 'sources' | 'dashboard'>('feed');
+    const [currentView, setCurrentView] = useState<'feed' | 'sources' | 'dashboard'>('dashboard');
     const [items, setItems] = useState<Item[]>([]);
     const [selectedItem, setSelectedItem] = useState<Item | null>(null);
     const [isLoadingFeed, setIsLoadingFeed] = useState<boolean>(true);
@@ -127,6 +127,16 @@ const App: React.FC = () => {
         }
     }, []);
 
+    const handleGlobalSearch = (term: string) => {
+        setFilters(prev => ({ ...prev, searchTerm: term }));
+        setCurrentView('feed');
+        // Reset live search state to avoid UI confusion
+        setLiveSearchQuery('');
+        setDisplayQuery('');
+        setLiveSearchResult(null);
+        setHasSearched(false);
+    };
+
     const handleDownload = () => {
         const printContent = `
             <html>
@@ -190,7 +200,14 @@ const App: React.FC = () => {
     
     const MainContent: React.FC = () => {
         if (currentView === 'sources') return <SourcesDashboard />;
-        if (currentView === 'dashboard') return <DashboardView items={items} isLoading={isLoadingFeed} />;
+        if (currentView === 'dashboard') return <DashboardView 
+            items={items} 
+            isLoading={isLoadingFeed}
+            onNavigate={handleNavigate}
+            onManageKeywords={() => setIsKeywordModalOpen(true)}
+            onDownload={handleDownload}
+            onCardClick={handleCardClick}
+            />;
 
         if (liveSearchQuery) {
             return (
@@ -219,7 +236,7 @@ const App: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
-            <Header currentView={currentView} onNavigate={handleNavigate} />
+            <Header currentView={currentView} onNavigate={handleNavigate} onGlobalSearch={handleGlobalSearch} />
             <div className="flex">
                 <Sidebar 
                     filters={filters} 

@@ -65,7 +65,10 @@ export const SourcesDashboard: React.FC = () => {
         }, { rootMargin: "-50% 0px -50% 0px" });
 
         Object.values(groupRefs.current).forEach(ref => {
-            if (ref) observer.observe(ref);
+            // FIX: Use `instanceof Element` as a type guard to ensure `ref` is a valid DOM element.
+            if (ref instanceof Element) {
+                observer.observe(ref);
+            }
         });
 
         return () => observer.disconnect();
