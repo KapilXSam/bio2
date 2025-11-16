@@ -17,11 +17,11 @@ const DashboardStatCard: React.FC<{ value: string; label: string }> = ({ value, 
 };
 
 // Local component for dashboard action cards
-const ActionCard: React.FC<{ icon: React.ReactNode; title: string; description: string; onClick: () => void; }> = ({ icon, title, description, onClick }) => {
+const ActionCard: React.FC<{ icon: React.ReactNode; title: string; description: string; onClick: () => void; isDisabled?: boolean; }> = ({ icon, title, description, onClick, isDisabled }) => {
     return (
         <div
-            onClick={onClick}
-            className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 cursor-pointer border border-gray-200 dark:border-gray-700"
+            onClick={!isDisabled ? onClick : undefined}
+            className={`bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 ${isDisabled ? 'opacity-60 cursor-not-allowed' : 'hover:shadow-lg transition-shadow duration-300 cursor-pointer'}`}
         >
             <div className="flex justify-center mb-3 text-teal-600 dark:text-teal-400">
                 {icon}
@@ -41,9 +41,10 @@ interface DashboardViewProps {
     onManageKeywords: () => void;
     onDownload: () => void;
     onCardClick: (item: Item) => void;
+    isGeneratingNewsletter: boolean;
 }
 
-export const DashboardView: React.FC<DashboardViewProps> = ({ items, isLoading, onNavigate, onManageKeywords, onDownload, onCardClick }) => {
+export const DashboardView: React.FC<DashboardViewProps> = ({ items, isLoading, onNavigate, onManageKeywords, onDownload, onCardClick, isGeneratingNewsletter }) => {
 
     const stats = useMemo(() => {
         const newsThisWeek = items.filter(item => {
@@ -79,10 +80,23 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ items, isLoading, 
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
                 <button 
                     onClick={onDownload}
-                    className="px-4 py-2 text-sm font-semibold text-white bg-teal-600 rounded-md hover:bg-teal-700 transition-colors flex items-center"
+                    disabled={isGeneratingNewsletter}
+                    className="px-4 py-2 text-sm font-semibold text-white bg-teal-600 rounded-md hover:bg-teal-700 transition-colors flex items-center disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
                 >
-                    <PlusIcon className="h-4 w-4 mr-2" />
-                    Generate Newsletter
+                     {isGeneratingNewsletter ? (
+                        <>
+                            <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Generating...
+                        </>
+                    ) : (
+                        <>
+                            <PlusIcon className="h-4 w-4 mr-2" />
+                            Generate Newsletter
+                        </>
+                    )}
                 </button>
             </header>
 
@@ -96,9 +110,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ items, isLoading, 
             <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <ActionCard 
                     icon={<MailIcon className="h-8 w-8" />} 
-                    title="Generate Newsletter" 
-                    description="Create and send weekly newsletter" 
+                    title={isGeneratingNewsletter ? "Generating..." : "Generate Newsletter"} 
+                    description={isGeneratingNewsletter ? "The AI is crafting your update." : "Create and send weekly newsletter"}
                     onClick={onDownload} 
+                    isDisabled={isGeneratingNewsletter}
                 />
                 <ActionCard 
                     icon={<RssIcon className="h-8 w-8" />} 

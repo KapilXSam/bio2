@@ -10,6 +10,7 @@ interface SidebarProps {
   onLiveSearch: (query: string) => void;
   onManageKeywords: () => void;
   onDownload: () => void;
+  isGeneratingNewsletter: boolean;
 }
 
 const useClickOutside = (ref: React.RefObject<HTMLElement>, handler: () => void) => {
@@ -85,7 +86,7 @@ const MultiSelectDropdown: React.FC<{
 };
 
 
-export const Sidebar: React.FC<SidebarProps> = ({ filters, items, onFiltersChange, onLiveSearch, onManageKeywords, onDownload }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ filters, items, onFiltersChange, onLiveSearch, onManageKeywords, onDownload, isGeneratingNewsletter }) => {
     const [liveQuery, setLiveQuery] = useState('');
 
     const handleFilterChange = <K extends keyof FilterState>(key: K, value: FilterState[K]) => {
@@ -193,11 +194,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ filters, items, onFiltersChang
             </button>
              <button 
                 onClick={onDownload} 
-                disabled={items.length === 0}
-                className="w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed dark:disabled:bg-gray-600"
+                disabled={items.length === 0 || isGeneratingNewsletter}
+                className="w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed dark:disabled:bg-gray-600 transition-colors"
             >
-                <DownloadIcon className="h-5 w-5 mr-2" />
-                Download Newsletter (PDF)
+                {isGeneratingNewsletter ? (
+                    <>
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Generating...
+                    </>
+                ) : (
+                    <>
+                        <DownloadIcon className="h-5 w-5 mr-2" />
+                        Generate & Download
+                    </>
+                )}
             </button>
         </div>
     </aside>

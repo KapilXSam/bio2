@@ -7,7 +7,7 @@ import { SourcesDashboard } from './components/SourcesDashboard';
 import { LiveSearchResults } from './components/LiveSearchResults';
 import { Spinner } from './components/Spinner';
 import type { Item, LiveSearchResult, FilterState, KeywordProfile } from './types';
-import { generateNewsFeed, performLiveSearch } from './services/geminiService';
+import { generateNewsFeed, performLiveSearch, generateNewsletterHtml } from './services/geminiService';
 import { DEBOUNCE_DELAY_MS } from './constants';
 import { KeywordManagerModal } from './components/KeywordManagerModal';
 import { DashboardView } from './components/DashboardView';
@@ -71,6 +71,7 @@ const App: React.FC = () => {
     const [liveSearchResult, setLiveSearchResult] = useState<LiveSearchResult | null>(null);
     const [isLoadingSearch, setIsLoadingSearch] = useState<boolean>(false);
     const [hasSearched, setHasSearched] = useState<boolean>(false);
+    const [isGeneratingNewsletter, setIsGeneratingNewsletter] = useState<boolean>(false);
 
     const debouncedFilters = useDebounce(filters, DEBOUNCE_DELAY_MS);
 
@@ -137,57 +138,35 @@ const App: React.FC = () => {
         setHasSearched(false);
     };
 
-    const handleDownload = () => {
-        const printContent = `
-            <html>
-                <head>
-                    <title>Biosimilar Intelligence Newsletter</title>
-                    <style>
-                        body { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; line-height: 1.6; margin: 2rem; color: #111827; }
-                        @media print {
-                            body { margin: 1in; }
-                        }
-                        h1 { font-size: 2.25rem; font-weight: bold; color: #1e3a8a; border-bottom: 2px solid #3b82f6; padding-bottom: 0.5rem; margin-bottom: 0.5rem; }
-                        h2 { font-size: 1.25rem; font-weight: bold; color: #1f2937; margin-top: 2rem; margin-bottom: 0.5rem; }
-                        p { margin-bottom: 1rem; }
-                        .meta { font-size: 0.875rem; color: #4b5563; margin-bottom: 1rem; border-left: 3px solid #d1d5db; padding-left: 1rem; }
-                        .article { border-bottom: 1px solid #e5e7eb; padding-bottom: 1.5rem; margin-bottom: 1.5rem; page-break-inside: avoid; }
-                        .article:last-child { border-bottom: none; }
-                        a { color: #2563eb; text-decoration: none; }
-                        a:hover { text-decoration: underline; }
-                        .header-meta { font-size: 1rem; color: #4b5563; }
-                    </style>
-                </head>
-                <body>
-                    <h1>Biosimilar Intelligence Newsletter</h1>
-                    <p class="header-meta">Generated on: ${new Date().toLocaleDateString()} | ${items.length} articles matching your criteria</p>
-                    ${items.map(item => `
-                        <div class="article">
-                            <h2>${item.title}</h2>
-                            <div class="meta">
-                                <strong>Published:</strong> ${new Date(item.published_at).toLocaleString()}<br/>
-                                <strong>Source:</strong> ${item.source_type} | <strong>Jurisdiction:</strong> ${item.jurisdiction}<br/>
-                                <strong>Sponsors:</strong> ${item.entities.sponsors.join(', ')}
-                            </div>
-                            <p>${item.summary}</p>
-                            <a href="${item.source_url}" target="_blank" rel="noopener noreferrer">Read Original Source &rarr;</a>
-                        </div>
-                    `).join('')}
-                </body>
-            </html>
-        `;
+    const handleDownload = async () => {
+        if (isGeneratingNewsletter) return;
 
-        const printWindow = window.open('', '_blank');
-        if (printWindow) {
-            printWindow.document.write(printContent);
-            printWindow.document.close();
-            printWindow.focus();
-            setTimeout(() => {
-                printWindow.print();
-                printWindow.close();
-            }, 500);
-        } else {
-            alert('Could not open print window. Please check your pop-up blocker settings.');
+        if (items.length === 0) {
+            alert("No news items to generate a newsletter from. Adjust filters to broaden your results.");
+            return;
+        }
+
+        setIsGeneratingNewsletter(true);
+        try {
+            const newsletterHtml = await generateNewsletterHtml(items, filters);
+
+            const printWindow = window.open('', '_blank');
+            if (printWindow) {
+                printWindow.document.write(newsletterHtml);
+                printWindow.document.close();
+                printWindow.focus();
+                setTimeout(() => {
+                    printWindow.print();
+                    printWindow.close();
+                }, 500); // Wait for rendering
+            } else {
+                alert('Could not open print window. Please check your pop-up blocker settings.');
+            }
+        } catch (error) {
+            console.error("Failed to generate newsletter:", error);
+            alert("An error occurred while generating the newsletter. Please try again.");
+        } finally {
+            setIsGeneratingNewsletter(false);
         }
     };
 
@@ -207,6 +186,7 @@ const App: React.FC = () => {
             onManageKeywords={() => setIsKeywordModalOpen(true)}
             onDownload={handleDownload}
             onCardClick={handleCardClick}
+            isGeneratingNewsletter={isGeneratingNewsletter}
             />;
 
         if (liveSearchQuery) {
@@ -245,6 +225,7 @@ const App: React.FC = () => {
                     onManageKeywords={() => setIsKeywordModalOpen(true)}
                     items={items}
                     onDownload={handleDownload}
+                    isGeneratingNewsletter={isGeneratingNewsletter}
                 />
                 <main className="flex-1 overflow-y-auto" style={{ height: 'calc(100vh - 64px)' }}>
                    <MainContent />
