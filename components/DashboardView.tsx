@@ -5,6 +5,7 @@ import { NewsCard } from './NewsCard';
 import { sourcesData } from '../data/sourcesData';
 import { ALL_COMPANIES } from '../constants';
 import { MailIcon, RssIcon, OfficeBuildingIcon, CogIcon, PlusIcon } from './Icons';
+import { OrbitingCirclesDemo } from './OrbitingCirclesDemo';
 
 // Local component for dashboard statistic cards
 const DashboardStatCard: React.FC<{ value: string; label: string }> = ({ value, label }) => {
@@ -21,14 +22,16 @@ const ActionCard: React.FC<{ icon: React.ReactNode; title: string; description: 
     return (
         <div
             onClick={!isDisabled ? onClick : undefined}
-            className={`bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 ${isDisabled ? 'opacity-60 cursor-not-allowed' : 'hover:shadow-lg transition-shadow duration-300 cursor-pointer'}`}
+            className={`bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 ${isDisabled ? 'opacity-60 cursor-not-allowed' : 'hover:shadow-lg hover:border-teal-500/50 transition-all duration-300 cursor-pointer'}`}
         >
-            <div className="flex justify-center mb-3 text-teal-600 dark:text-teal-400">
-                {icon}
-            </div>
-            <div className="text-center">
-                <h3 className="font-semibold text-gray-800 dark:text-gray-200">{title}</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{description}</p>
+             <div className="flex items-center space-x-4">
+                <div className="flex-shrink-0 text-teal-600 dark:text-teal-400">
+                    {icon}
+                </div>
+                <div>
+                    <h3 className="font-semibold text-gray-800 dark:text-gray-200">{title}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{description}</p>
+                </div>
             </div>
         </div>
     );
@@ -107,32 +110,30 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ items, isLoading, 
                 <DashboardStatCard value={stats.newsletterRecipients.toString()} label="Newsletter Recipients" />
             </section>
 
-            <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <ActionCard 
-                    icon={<MailIcon className="h-8 w-8" />} 
-                    title={isGeneratingNewsletter ? "Generating..." : "Generate Newsletter"} 
-                    description={isGeneratingNewsletter ? "The AI is crafting your update." : "Create and send weekly newsletter"}
-                    onClick={onDownload} 
-                    isDisabled={isGeneratingNewsletter}
-                />
-                <ActionCard 
-                    icon={<RssIcon className="h-8 w-8" />} 
-                    title="Add News Source" 
-                    description="Configure new RSS feed" 
-                    onClick={() => onNavigate('sources')} 
-                />
-                <ActionCard 
-                    icon={<OfficeBuildingIcon className="h-8 w-8" />} 
-                    title="View Companies" 
-                    description="Manage company monitoring" 
-                    onClick={() => onNavigate('feed')} 
-                />
-                <ActionCard 
-                    icon={<CogIcon className="h-8 w-8" />} 
-                    title="Configure Keywords" 
-                    description="Manage monitoring keywords" 
-                    onClick={onManageKeywords} 
-                />
+             <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                <OrbitingCirclesDemo />
+                <div className="space-y-6">
+                    <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Quick Actions</h2>
+                     <ActionCard 
+                        icon={<MailIcon className="h-8 w-8" />} 
+                        title={isGeneratingNewsletter ? "Generating..." : "Generate Newsletter"} 
+                        description={isGeneratingNewsletter ? "The AI is crafting your update." : "Create and send weekly newsletter"}
+                        onClick={onDownload} 
+                        isDisabled={isGeneratingNewsletter}
+                    />
+                    <ActionCard 
+                        icon={<RssIcon className="h-8 w-8" />} 
+                        title="Add News Source" 
+                        description="Configure new RSS feed" 
+                        onClick={() => onNavigate('sources')} 
+                    />
+                    <ActionCard 
+                        icon={<CogIcon className="h-8 w-8" />} 
+                        title="Configure Keywords" 
+                        description="Manage monitoring keywords" 
+                        onClick={onManageKeywords} 
+                    />
+                </div>
             </section>
 
             <section>
